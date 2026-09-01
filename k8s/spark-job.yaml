@@ -1,0 +1,45 @@
+apiVersion: batch/v1
+kind: Job
+
+metadata:
+  name: spark-job
+  namespace: urban-data
+
+spec:
+  template:
+    spec:
+
+      restartPolicy: Never
+
+      containers:
+      - name: spark
+
+        image: apache/spark:3.5.1
+
+        env:
+        - name: HOME
+          value: /tmp
+
+        - name: IVY_HOME
+          value: /tmp/.ivy2
+
+        command:
+        - /bin/bash
+        - -c
+
+        args:
+        - |
+          mkdir -p /tmp/.ivy2/cache && \
+          /opt/spark/bin/spark-submit \
+          --conf spark.jars.ivy=/tmp/.ivy2 \
+          --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1 \
+          /opt/spark/jobs/spark_streaming.py
+
+        volumeMounts:
+        - name: spark-script
+          mountPath: /opt/spark/jobs
+
+      volumes:
+      - name: spark-script
+        configMap:
+          name: spark-script

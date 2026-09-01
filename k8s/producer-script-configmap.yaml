@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: producer-script
+  namespace: urban-data
+
+data:
+  producer.py: |
+    import json
+    import random
+    import time
+    import os
+
+    from kafka import KafkaProducer
+    from datetime import datetime
+
+    topic = os.getenv("KAFKA_TOPIC", "urban_sensors")
+    broker = os.getenv("KAFKA_BROKER", "kafka-service:9092")
+
+    producer = KafkaProducer(
+        bootstrap_servers=broker,
+        value_serializer=lambda v: json.dumps(v).encode("utf-8")
+    )
+
+    while True:
+
+        event = {
+            "sensor_id": f"sensor_{random.randint(1,5)}",
+            "temperature": round(random.uniform(15,35), 2),
+            "humidity": round(random.uniform(40,90), 2),
+            "air_quality_index": random.randint(10,100),
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+        producer.send(topic, event)
+        producer.flush()
+
+        print(event)
+
+        time.sleep(2)

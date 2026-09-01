@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: producer-config
+  namespace: urban-data
+
+data:
+  KAFKA_BROKER: kafka:9092
+  KAFKA_TOPIC: urban_sensors

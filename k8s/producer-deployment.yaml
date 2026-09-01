@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: urban-producer
+  namespace: urban-data
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: urban-producer
+
+  template:
+    metadata:
+      labels:
+        app: urban-producer
+
+    spec:
+      containers:
+      - name: urban-producer
+
+        image: python:3.11
+
+        command:
+        - /bin/sh
+        - -c
+
+        args:
+        - |
+          pip install kafka-python && \
+          python /app/producer.py
+
+        envFrom:
+        - configMapRef:
+            name: producer-config
+
+        volumeMounts:
+        - name: producer-script
+          mountPath: /app
+
+      volumes:
+      - name: producer-script
+        configMap:
+          name: producer-script
